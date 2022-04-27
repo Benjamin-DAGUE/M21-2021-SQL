@@ -325,3 +325,48 @@ SELECT DISTINCT
 FROM
 	Address AS t0
 
+
+--CUBE : On fait toutes les combinaisons possibles de grouping
+SELECT
+	t0.IdentifierCity
+	,t0.RoadType
+	,COUNT(*)  AS Total
+	,GROUPING(t0.IdentifierCity) --GROUPING Détermine si la colonne est aggrégée
+	,GROUPING(t0.RoadType)
+FROM
+	Address AS t0
+GROUP BY CUBE
+(
+	t0.IdentifierCity
+	,t0.RoadType
+)
+--ROLLUP : Effectue l'ensemble des regroupement en supprimant le dernier à chaque fois. Par ex ROLLUP A,B,C donne les quatre groupes suivants : ABC, AB, A, ()
+SELECT
+	t0.IdentifierCity
+	,t0.RoadType
+	,COUNT(*)  AS Total
+	,GROUPING(t0.IdentifierCity)
+	,GROUPING(t0.RoadType)
+FROM
+	Address AS t0
+GROUP BY ROLLUP
+(
+	t0.IdentifierCity
+	,t0.RoadType
+)
+--GROUPING SET : Permet de définir l'ensemble des groupes à produire
+SELECT
+	t0.IdentifierCity
+	,t0.RoadType
+	,COUNT(*)  AS Total
+	,GROUPING(t0.IdentifierCity)
+	,GROUPING(t0.RoadType)
+FROM
+	Address AS t0
+GROUP BY GROUPING SETS
+(
+	(t0.IdentifierCity)
+	,(t0.RoadType)
+	,(t0.StreetNumber)
+	,(t0.IdentifierCity, t0.StreetNumber)
+)
