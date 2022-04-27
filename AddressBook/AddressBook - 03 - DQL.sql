@@ -370,3 +370,175 @@ GROUP BY GROUPING SETS
 	,(t0.StreetNumber)
 	,(t0.IdentifierCity, t0.StreetNumber)
 )
+
+------------------------------------------------------------------------------------------------
+/***Opérateurs ensemblistes***/
+
+--INTERSECT : garde les éléments présents dans les deux ensembles
+SELECT * FROM Contact AS t0 WHERE t0.FirstName LIKE N'B%'
+INTERSECT
+SELECT * FROM Contact AS t0 WHERE t0.LastName LIKE N'D%'
+
+--UNION : union des deux ensembles et suppression des doublons
+SELECT 'test'
+UNION
+SELECT 'toto'
+UNION
+SELECT 'test'
+
+--UNION ALL : union des deux ensembles qui garde les doublons
+SELECT 'test'
+UNION ALL
+SELECT 'toto'
+UNION ALL
+SELECT 'test'
+
+--EXCEPT : Supprime les éléments de l'ensemble A qui sont dans l'ensemble B
+SELECT * FROM Contact AS t0 WHERE t0.LastName LIKE N'D%' --A
+EXCEPT
+SELECT * FROM Contact AS t0 WHERE t0.FirstName LIKE N'B%' --B
+
+--CROSS JOIN : Produit cartésien entre deux ensembles
+SELECT
+	*
+FROM
+	Address AS t0
+CROSS JOIN
+	City AS t1
+
+--Ancienne norme SQL :
+SELECT * FROM Address AS t0, City AS t1
+
+SELECT 
+	CASE
+		WHEN t1.Type = 1 THEN t0.Amount
+		WHEN t1.Type = 2 THEN t0.Amount * 0.2
+		WHEN t1.Type = 3 THEN t0.Amount * 1.2
+	END
+	,t1.Type
+FROM
+(
+	SELECT 500 AS Amount
+) AS t0
+CROSS JOIN
+(
+	SELECT 1 AS Type
+	UNION ALL
+	SELECT 2 AS Type
+	UNION ALL
+	SELECT 3 AS Type
+) AS t1
+
+--Jointures
+--Equijointure
+SELECT * FROM Address CROSS JOIN City
+SELECT 
+	* 
+FROM 
+	Address AS t0
+INNER JOIN
+	City AS t1 ON t0.IdentifierCity = t1.Identifier
+
+	
+--Ancienne norme SQL :
+SELECT * FROM Address AS t0, City AS t1 WHERE t0.IdentifierCity = t1.Identifier
+
+
+--Jointures externes
+--LEFT JOIN et RIGHT JOIN
+
+--On récupère tous les enregistrements de A avec les enregistrements de B si il y a une association.
+--On ne récupère pas les enregistrements de B si il ne sont pas associés à au moins un enregistrement de A.
+--SELECT * FROM A LEFT JOIN B ON A.IdentifierB = B.Identifier
+
+--On récupère tous les enregistrements de B avec les enregistrements de A si il y a une association.
+--On ne récupère pas les enregistrements de A si il ne sont pas associés à au moins un enregistrement de B.
+--SELECT * FROM A RIGHT JOIN B ON A.IdentifierB = B.Identifier
+
+--Sélectionner les villes avec les adresses + les villes sans adresse (on prend tous les champs)
+SELECT
+	*
+FROM
+	City AS t0
+LEFT JOIN
+	Address AS t1 ON t0.Identifier = t1.IdentifierCity
+
+SELECT
+	*
+FROM
+	Address AS t0
+RIGHT JOIN
+	City AS t1 ON t1.Identifier = t0.IdentifierCity
+
+--Uniquement les villes sans adresse :
+SELECT
+	*
+FROM
+	City AS t0
+LEFT JOIN
+	Address AS t1 ON t0.Identifier = t1.IdentifierCity
+WHERE
+	t1.Identifier IS NULL
+
+
+--FULL OUTER JOIN = LEFT JOIN + RIGHT JOIN
+--Pour récupérer à la fois les enregistrements correspondants et sans correspondances entre deux ensembles.
+SELECT
+	*
+FROM
+	Contact AS t0
+FULL OUTER JOIN
+	Civility AS t1 ON t0.IdentifierCivility = t1.Identifier
+
+SELECT
+	*
+FROM
+	Contact AS t0
+FULL OUTER JOIN
+	Civility AS t1 ON t0.IdentifierCivility = t1.Identifier
+WHERE
+	t0.Identifier IS NULL
+	OR
+	t1.Identifier IS NULL
+
+
+GO
+/*
+Pour la projection des exo 1 à 4 : Contact.FullName et Civility.ShortName
+1 : Pour chaque persone, afficher la civilité associée, garder également les personnes sans civiltié
+*/
+
+/*
+2 : Afficher les personnes sans civilité
+*/
+
+/*
+3 : Pour chaque civilité, afficher les personnes associées, garder les civilités sans personne
+*/
+
+/*
+4 : Afficher les cvivilité sans personne
+*/
+
+/*
+5 : Pour chaque code postal, afficher le nombre de contact
+	5.A : les codes postaux sans contact doivent être affichés
+	*/
+
+	/*
+	5.B : les codes postaux sans contact sont à ignorer
+	*/
+
+/*
+6 : Afficher la moyenne d'âge (en valeur décimal) par code postal
+    Afficher NULL si pas de contactZ
+	Si une personne n'a pas d'âge, il ne faut pas en tenir compte
+*/
+	
+/*
+7 : Afficher la moyenne d'âge (en valeur décimal)
+		-> Par adresse (Street number + RoadType + RoadName + CityName)
+		-> Par ville et code postal
+		-> Par code postal
+		-> La moyenne d'âge globale
+*/
