@@ -242,4 +242,86 @@ En une seule requête
 	-> Total adresse regroupé par ville (Identifier) et par type de rue
 	-> Total adresse régroupé par ville (Identifier)
 	-> Total général
+
+| CityIdentifier | RoadType | TotalCityRoadType | TotalCity | Total |
+---------------------------------------------------------------------
+
 */
+
+--V1
+SELECT
+	t0.IdentifierCity
+	,t0.RoadType
+	,t0.TotalCityRoadType
+	,t1.TotalCity
+	,(SELECT COUNT(*) FROM Address) AS Total
+FROM
+(
+	SELECT
+		t0.IdentifierCity
+		,t0.RoadType
+		,COUNT(*)		AS TotalCityRoadType
+	FROM
+		Address AS t0
+	GROUP BY
+		t0.IdentifierCity
+		,t0.RoadType
+) AS t0
+INNER JOIN
+(
+	SELECT
+		t0.IdentifierCity
+		,COUNT(*)		AS TotalCity
+	FROM
+		Address AS t0
+	GROUP BY
+		t0.IdentifierCity
+) AS t1 ON t0.IdentifierCity = t1.IdentifierCity
+
+--V2
+SELECT
+	t0.IdentifierCity
+	,t0.RoadType
+	,t0.TotalCityRoadType
+	,t1.TotalCity
+	,t2.Total
+FROM
+(
+	SELECT
+		t0.IdentifierCity
+		,t0.RoadType
+		,COUNT(*)		AS TotalCityRoadType
+	FROM
+		Address AS t0
+	GROUP BY
+		t0.IdentifierCity
+		,t0.RoadType
+) AS t0
+INNER JOIN
+(
+	SELECT
+		t0.IdentifierCity
+		,COUNT(*)		AS TotalCity
+	FROM
+		Address AS t0
+	GROUP BY
+		t0.IdentifierCity
+) AS t1 ON t0.IdentifierCity = t1.IdentifierCity
+CROSS JOIN
+(
+	SELECT
+		COUNT(*) AS Total
+	FROM 
+		Address
+) AS t2
+
+--V3
+SELECT DISTINCT
+	t0.IdentifierCity
+	,t0.RoadType
+	,COUNT(*) OVER (PARTITION BY t0.IdentifierCity, t0.RoadType) 	AS TotalCityRoadType
+	,COUNT(*) OVER (PARTITION BY t0.IdentifierCity) 				AS TotalCity
+	,COUNT(*) OVER () 												AS Total
+FROM
+	Address AS t0
+
