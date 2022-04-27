@@ -147,6 +147,54 @@ SELECT
 	,SCOPE_IDENTITY()
 	,IDENT_CURRENT('[AddressBook].[dbo].[City]')
 
+GO
+--CREATE TABLE
+
+--SELECT .. INTO créé une table temp (dans la base TempDB) à partir d'un résultat de requête
+--Les colonnes et les types de données de la table sont déduis à partir de la projection de la requête
+--Ici, TOP(0) permet de ne copier aucun enregistrement dans la table temp (on fait une copie de la structure uniquement)
+--SELECT TOP(0) * INTO #AddressContact FROM AddressContact
+
+--Une table temp commence par #, elle est accessible uniquemenet dans la connexion en cours. Détruit à la fermeture de la connexion.
+--Une table temp globale commence par ##, elle est accessible par l'ensemble des connexions. Détruit au redémarage du serveur.
+
+CREATE TABLE #AddressContact
+(
+	[Identifier]			BIGINT		NOT NULL
+	,[IdentifierAddress]	BIGINT		NOT NULL
+	,[IdentifierContact]	BIGINT		NOT NULL
+)
+
+
+--Lors d'une opération d'INSERT ou d'UPDATE, il est possible de récupérer les identifiants, ou autres colonnes calculées avec OUTPUT INTO
+INSERT INTO [AddressBook].[dbo].[AddressContact]
+(
+	[IdentifierAddress]
+	,[IdentifierContact]
+)
+OUTPUT
+	inserted.Identifier
+	,inserted.IdentifierAddress
+	,inserted.IdentifierContact
+INTO
+	#AddressContact
+VALUES
+	(1,		1)
+	,(1,	2)	
+	,(3,	3)
+	,(3,	4)
+	,(3,	5)
+	,(4,	6)
+	,(5,	7)
+	,(6,	8)
+	,(9,	9)
+	,(10,	10)
+	,(11,	11);
+	
+SELECT * FROM #AddressContact
+
+DROP TABLE #AddressContact
+GO
 
 
 CREATE TABLE #TempTable (
